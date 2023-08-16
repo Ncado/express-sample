@@ -5,6 +5,7 @@ import {Op} from 'sequelize'
 import {FindAndCountOptions} from 'sequelize/types';
 import {CreateMovieDto} from "./dto/create-movie.dto";
 import {sequelize} from "../../configs/database.config";
+import {CustomError} from "../../utils/custom-error";
 
 export class MoviesService {
     private actorsService: ActorsService;
@@ -15,6 +16,12 @@ export class MoviesService {
 
 
     async createMovie(dto: CreateMovieDto) {
+        const movie = await Movie.findOne({
+            where: {title: dto.title},
+        });
+        if (movie) {
+            throw new CustomError("MOVIE_EXISTS", {"title": "NOT_UNIQUE"}, "MOVIE_EXISTS");
+        }
         const transaction = await sequelize.transaction();
         try {
             const resActors = await Promise.all(dto.actors.map(element => this.actorsService.createActor(element)));
@@ -83,7 +90,7 @@ export class MoviesService {
             }]
         });
         if (!movie) {
-            throw new Error('MOVIE_NOT_FOUND');
+            throw new CustomError("MOVIE_NOT_FOUND", {id: movieId}, "MOVIE_NOT_FOUND");
         }
         // return movie;
         return {data: movie};
@@ -93,7 +100,7 @@ export class MoviesService {
     async updateMovie(dto, id) {
         const movie = await Movie.findOne({where: {id: id}});
         if (!movie) {
-            throw new Error('MOVIE_NOT_FOUND');
+            throw new CustomError("MOVIE_NOT_FOUND", {movieId: String(id)}, "MOVIE_NOT_FOUND");
         }
 
         const arr = [];
@@ -128,13 +135,16 @@ export class MoviesService {
     }
 
     async deleteMovie(movieId: number) {
-
-        if (await this.getMovie(movieId)) {
+        const movie = await Movie.findOne({
+            where: {id: Number(movieId)}
+        });
+        if (movie) {
             return await Movie.destroy({
                 where: {id: movieId}
             });
         }
-        throw new Error('MOVIE_NOT_FOUND');
+        throw new CustomError("MOVIE_NOT_FOUND", {movieId: String(movieId)}, "MOVIE_NOT_FOUND");
+
     }
 
     async import(str) {

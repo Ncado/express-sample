@@ -1,36 +1,37 @@
 import {Actor} from "../actors/actor.model";
 import {Movie} from "../movies/movies.model";
 import {sequelize} from "../../configs/database.config";
-import {DataType} from "sequelize-typescript";
+import {DataTypes} from "sequelize";
 
-export const ActorsMovies = sequelize.define('ActorsMovies', {
-    ActorId: {
-        type: DataType.INTEGER,
-        references: {
-            model: 'Actors', // 'Actors' refers to the table name
-            key: 'id',
+
+export const initializeDatabase = async () => {
+    const ActorsMovies = sequelize.define('ActorsMovies', {
+        ActorId: {
+            type: DataTypes.INTEGER,
+            references: {
+                model: 'Actors',
+                key: 'id',
+            }
+        },
+        MovieId: {
+            type: DataTypes.INTEGER,
+            references: {
+                model: 'Movies',
+                key: 'id',
+            }
         }
-    },
-    MovieId: {
-        type: DataType.INTEGER,
-        references: {
-            model: 'Movies', // 'Movies' refers to the table name
-            key: 'id',
-        }
-    }
-});
+    });
+    Actor.belongsToMany(Movie, {
+        through: "ActorsMovies",
+        foreignKey: 'ActorId',
+        otherKey: 'MovieId'
+    });
 
-Actor.belongsToMany(Movie, {
-    through: "ActorsMovies",
-    // as: 'Movies',
-    // foreignKey: 'ActorId',
-    // otherKey: 'MovieId'
-
-});
-
-Movie.belongsToMany(Actor, {
-    through: "ActorsMovies",
-    // as: 'Actors',
-    // foreignKey: 'MovieId',
-    // otherKey: 'ActorId'
-});
+    Movie.belongsToMany(Actor, {
+        through: "ActorsMovies",
+        foreignKey: 'MovieId',
+        otherKey: 'ActorId'
+    });
+    await sequelize.sync({force: true});
+    console.log('Database & tables created!');
+}

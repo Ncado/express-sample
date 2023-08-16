@@ -19,8 +19,12 @@ router.post('/', async (req: CreateSessionRequest, res: Response) => {
         const token = await authService.login(email, password);
         res.cookie('jwt', token, {httpOnly: true});
         res.json(token);
-    } catch (error) {
-        res.status(400).json({message: error.message});
+    } catch (err) {
+        res.status(500).json({
+            message: err.message,
+            code: err.code || 'UNKNOWN_ERROR',
+            fields: err.fields || undefined
+        });
     }
 });
 

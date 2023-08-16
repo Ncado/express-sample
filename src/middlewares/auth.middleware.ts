@@ -6,6 +6,8 @@ const jwtService = new JwtService();
 export function authMiddleware(req: Request, res: Response, next: NextFunction) {
     try {
         let token = req.cookies.jwt;
+
+
         if (!token) {
             const authHeader = req.headers['authorization'];
             token = {token: authHeader && authHeader.split(' ')[1]};
@@ -14,7 +16,11 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
 
         if (token.length < 0) {
             console.log("token.length < 0", token.length < 0)
-            return res.status(401).json({message: 'Unauthorized'});
+            return res.status(401).json({
+                message: "FORMAT_ERROR",
+                code: "FORMAT_ERROR",
+                fields: {"token": "REQUIRED"}
+            });
         }
 
         jwtService.verifyToken(token);
@@ -23,6 +29,10 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
         next();
 
     } catch (error) {
-        res.status(401).json({message: 'Unauthorized'});
+        res.status(401).json({
+            message: "FORMAT_ERROR",
+            code: "FORMAT_ERROR",
+            fields: {"token": "REQUIRED"}
+        });
     }
 }

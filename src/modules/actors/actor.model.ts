@@ -1,5 +1,4 @@
 import {sequelize} from "../../configs/database.config";
-
 import {DataTypes} from "sequelize";
 
 export const Actor = sequelize.define('Actor', {
@@ -14,5 +13,7 @@ export const Actor = sequelize.define('Actor', {
         allowNull: false,
         unique: true
     }
-});
+}, {
+    timestamps: true
 
+});

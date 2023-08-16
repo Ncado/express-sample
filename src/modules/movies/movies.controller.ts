@@ -26,7 +26,11 @@ router.post('/import', upload.single('movies'), async (req, res) => {
         const result = await moviesService.import(fileContent);
         res.json(result);
     } catch (err) {
-        res.status(500).json({error: err.message});
+        res.status(400).json({
+            message: err.message,
+            code: err.code || 'UNKNOWN_ERROR',
+            fields: err.fields || undefined
+        });
     }
 });
 
@@ -41,7 +45,11 @@ router.post('/', async (req: CreateMovieRequest, res: Response) => {
         const result = await moviesService.createMovie(req.body);
         res.json(result);
     } catch (err) {
-        res.status(500).json({error: err.message});
+        res.status(400).json({
+            message: err.message,
+            code: err.code || 'UNKNOWN_ERROR',
+            fields: err.fields || undefined
+        });
     }
 });
 
@@ -55,7 +63,11 @@ router.patch('/:id', async (req: UpdateMovieRequest, res: Response) => {
         const result = await moviesService.updateMovie(req.body, Number(req.params.id));
         res.json(result);
     } catch (err) {
-        res.status(500).json({error: err.message});
+        res.status(400).json({
+            message: err.message,
+            code: err.code || 'UNKNOWN_ERROR',
+            fields: err.fields || undefined
+        });
     }
 });
 
@@ -96,8 +108,13 @@ router.get('/:id', async (req, res) => {
         const result = await moviesService.getMovie(Number(req.params.id));
         res.json(result);
     } catch (err) {
-        res.status(500).json({error: err.message});
+        res.status(400).json({
+            message: err.message,
+            code: err.code || 'UNKNOWN_ERROR',
+            fields: err.fields || undefined
+        });
     }
+
 });
 
 router.delete('/:id', async (req, res) => {
@@ -105,7 +122,11 @@ router.delete('/:id', async (req, res) => {
         const result = await moviesService.deleteMovie(Number(req.params.id));
         res.json(result);
     } catch (err) {
-        res.status(500).json({error: err.message});
+        res.status(500).json({
+            message: err.message,
+            code: err.code || 'UNKNOWN_ERROR',
+            fields: err.fields || undefined
+        });
     }
 });
 

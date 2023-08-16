@@ -16,5 +16,10 @@ export const Movie = sequelize.define('Movie', {
         type: DataTypes.ENUM(...Object.values(MoviesFormatEnum))
     },
     year: DataTypes.INTEGER
-});
+}, {
+    timestamps: true
+
+})
+
+
 

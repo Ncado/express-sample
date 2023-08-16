@@ -15,4 +15,8 @@ export const User = sequelize.define('User', {
         unique: true,
     },
     password: DataTypes.STRING
+}, {
+    timestamps: true
+
+
 });

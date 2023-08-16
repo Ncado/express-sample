@@ -2,14 +2,9 @@
 import express from "express";
 
 import dotenv from 'dotenv';
-import {sequelize} from "./configs/database.config";
-import {Actor} from "./modules/actors/actor.model";
-import {Movie} from "./modules/movies/movies.model";
-import {DataTypes} from "sequelize";
-import cookieParser from 'cookie-parser';
 import apiRouter from "./app.routes";
-import {modifyResponse} from "./middlewares/response.innterceptor";
-import {modifyErrorResponse} from "./middlewares/error-handler.interseptor";
+import {initializeDatabase} from "./modules/relations/actor-movie.relation";
+import {setupMiddleware} from "./setup-middleware";
 
 const router = express.Router();
 
@@ -18,55 +13,16 @@ const session = require('express-session');
 dotenv.config();
 
 const app = express();
-const port = 3000;
-app.use(express.json());
-app.use(cookieParser());
-app.use(modifyErrorResponse);
-app.use(modifyResponse);
+setupMiddleware(app);
 
-app.use(session({
-    secret: 'your-secret-key',
-    resave: false,
-    saveUninitialized: true,
-}));
 
 app.use('/api/v1', apiRouter);
 
-const ActorsMovies = sequelize.define('ActorsMovies', {
-    ActorId: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: 'Actors',
-            key: 'id',
-        }
-    },
-    MovieId: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: 'Movies',
-            key: 'id',
-        }
-    }
-});
-Actor.belongsToMany(Movie, {
-    through: "ActorsMovies",
-    foreignKey: 'ActorId',
-    otherKey: 'MovieId'
-});
+initializeDatabase().then(() => {
 
-Movie.belongsToMany(Actor, {
-    through: "ActorsMovies",
-    foreignKey: 'MovieId',
-    otherKey: 'ActorId'
-});
+    console.log('Database & tables created!');
 
-
-sequelize.sync({force: true})
-    .then(() => {
-
-        console.log('Database & tables created!');
-
-        app.listen(3000, () => {
-            console.log(`Server started on port ${3000}`);
-        });
+    app.listen(process.env.PORT, () => {
+        console.log(`Server started on port ${process.env.PORT}`);
     });
+});
