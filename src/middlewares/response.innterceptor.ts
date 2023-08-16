@@ -4,8 +4,7 @@ export function modifyResponse(req, res, next) {
     res.json = (data) => {
         if (res.statusCode >= 400 && res.statusCode < 600) {
             let newResponse;
-            console.log(data)
-            console.log(")_)_)_)_)_)_)_)_)_)_)_)_)_)_")
+
 
             newResponse = {
                 status: 0,
