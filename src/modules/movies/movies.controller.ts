@@ -1,8 +1,8 @@
 import express, {Request, Response} from 'express';
 import multer from "multer";
 import {MoviesService} from "./movies.service";
-import {CreateMovieDto} from "./dto/create-movie.dto";
-import {UpdateMovieDto} from "./dto/update-movie.dto";
+import {validationResult} from "express-validator";
+import {MovieValidationRules} from "./validation.rules";
 
 const router = express.Router();
 const {extname} = require('path');
@@ -20,7 +20,7 @@ const upload = multer({
     },
 });
 
-router.post('/import', upload.single('movies'), async (req, res) => {
+router.post('/import', upload.single('movies'), async (req: Request, res: Response) => {
     try {
         const fileContent = req.file.buffer.toString();
         const result = await moviesService.import(fileContent);
@@ -34,11 +34,13 @@ router.post('/import', upload.single('movies'), async (req, res) => {
     }
 });
 
-interface CreateMovieRequest extends Request {
-    body: CreateMovieDto;
-}
 
-router.post('/', async (req: CreateMovieRequest, res: Response) => {
+router.post('/', MovieValidationRules, async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({fields: errors.array()});
+    }
     try {
 
         const result = await moviesService.createMovie(req.body);
@@ -52,11 +54,15 @@ router.post('/', async (req: CreateMovieRequest, res: Response) => {
     }
 });
 
-interface UpdateMovieRequest extends Request {
-    body: UpdateMovieDto;
-}
+// interface UpdateMovieRequest extends Request {
+//     body: UpdateMovieDto;
+// }
 
-router.patch('/:id', async (req: UpdateMovieRequest, res: Response) => {
+router.patch('/:id', MovieValidationRules, async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({fields: errors.array()});
+    }
     try {
         const result = await moviesService.updateMovie(req.body, Number(req.params.id));
         res.json(result);
@@ -69,7 +75,7 @@ router.patch('/:id', async (req: UpdateMovieRequest, res: Response) => {
     }
 });
 
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
     try {
         const actorObj = {};
         const titleObj = {};
@@ -101,7 +107,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: Request, res: Response) => {
     try {
         const result = await moviesService.getMovie(Number(req.params.id));
         res.json(result);
@@ -115,7 +121,7 @@ router.get('/:id', async (req, res) => {
 
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: Request, res: Response) => {
     try {
         const result = await moviesService.deleteMovie(Number(req.params.id));
         res.json(result);

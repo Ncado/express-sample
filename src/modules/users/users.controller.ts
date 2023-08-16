@@ -1,17 +1,19 @@
 import {UsersService} from "../users/users.service";
-import {CreateUserDataDto} from "./dto/create-user-data.dto";
 import {Request, Response} from 'express';
+import {createUserValidation} from "./validation.rules";
+import {validationResult} from "express-validator";
 
 const express = require('express');
 
 const router = express.Router();
 const usersService = new UsersService();
 
-interface CreateUserRequest extends Request {
-    body: CreateUserDataDto;
-}
 
-router.post('/', async (req: CreateUserRequest, res: Response) => {
+router.post('/', createUserValidation, async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({fields: errors.array()});
+    }
     try {
         const user = await usersService.createUser(req.body);
         res.status(201).json(user);

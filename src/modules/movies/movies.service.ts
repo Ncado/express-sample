@@ -146,26 +146,7 @@ export class MoviesService {
     }
 
     async import(str) {
-        const arr = str.split('\n').map((i) => i.split(': ')).reduce((a, [k, v]) => {
-            if (!v) a.push({});
-            else a[a.length - 1][k] = v;
-            return a;
-        }, [{}]);
-
-        arr.forEach((element, index) => {
-            if (JSON.stringify(element) !== '{}') {
-                element['title'] = element['Title'];
-                element['year'] = element['Release Year'];
-                element['format'] = element['Format'];
-                element['actors'] = element['Stars'].split(', ');
-                delete element['Title'];
-                delete element['Release Year'];
-                delete element['Format'];
-                delete element['Stars'];
-            } else {
-                arr[index] = undefined;
-            }
-        });
+        const arr = this.parseInput(str);
 
         let result = arr.filter(item => item);
         let response = {
@@ -184,9 +165,67 @@ export class MoviesService {
                 response.meta.imported += 1;
             } catch (e) {
                 console.error(e);
+                throw new CustomError(e.message, e.fields, e.code);
+
             }
         }
 
         return response;
+    }
+
+
+    parseInput(str) {
+        const lines = str.split('\n');
+        let arr = [];
+        let obj = {};
+
+        for (let line of lines) {
+            const [key, value] = line.split(': ');
+
+            if (!value) {
+                if (Object.keys(obj).length) {
+                    this.validateMovie(obj);
+                    arr.push(obj);
+                    obj = {};
+                }
+                continue;
+            }
+
+            if (['Title', 'Release Year', 'Format', 'Stars'].includes(key)) {
+                obj[key] = value;
+            } else {
+                throw new CustomError("INVALID_FILE_FORMAT", {}, "INVALID_FILE_FORMAT");
+            }
+        }
+
+        if (Object.keys(obj).length) {
+            this.validateMovie(obj);
+            arr.push(obj);
+        }
+
+        arr.forEach((element, index) => {
+            if (JSON.stringify(element) !== '{}') {
+                element['title'] = element['Title'];
+                element['year'] = element['Release Year'];
+                element['format'] = element['Format'];
+                element['actors'] = element['Stars'].split(', ');
+                delete element['Title'];
+                delete element['Release Year'];
+                delete element['Format'];
+                delete element['Stars'];
+            } else {
+                arr[index] = undefined;
+            }
+        });
+
+        return arr.filter(item => item);
+    }
+
+    validateMovie(movie) {
+        if (!movie['Title'] || !movie['Release Year'] || !movie['Format'] || !movie['Stars']) {
+            throw new Error('Missing required fields in movie record');
+        }
+
+        // Additional validations based on your requirements
     }
 }

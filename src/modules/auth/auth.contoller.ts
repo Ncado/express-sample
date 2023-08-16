@@ -1,7 +1,8 @@
 import {UsersService} from "../users/users.service";
 import {AuthService} from "./auth.service";
 import {Request, Response} from 'express';
-import {SessionDto} from "./dto/session.dto";
+import {loginValidation} from "./validation.rules";
+import {validationResult} from "express-validator";
 
 const express = require('express');
 
@@ -9,11 +10,13 @@ const router = express.Router();
 const authService = new AuthService()
 const usersService = new UsersService();
 
-interface CreateSessionRequest extends Request {
-    body: SessionDto;
-}
 
-router.post('/', async (req: CreateSessionRequest, res: Response) => {
+router.post('/', loginValidation, async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({fields: errors.array()});
+    }
     const {email, password} = req.body;
     try {
         const token = await authService.login(email, password);
