@@ -1,7 +1,7 @@
 import {ActorsService} from "../actors/actors.service";
 import {Movie} from "./movies.model";
 import {Actor} from "../actors/actor.model";
-import {Op} from 'sequelize'
+import {Op, Sequelize} from 'sequelize'
 import {FindAndCountOptions} from 'sequelize/types';
 import {CreateMovieDto} from "./dto/create-movie.dto";
 import {sequelize} from "../../configs/database.config";
@@ -49,7 +49,7 @@ export class MoviesService {
         const offset = (page - 1) * limit;
 
         const options: FindAndCountOptions = {
-            order: [[sort, order]],
+            order: [[Sequelize.fn('LOWER', Sequelize.col(sort)), order]],
             include: [{
                 model: Actor,
                 attributes: [],
@@ -75,7 +75,15 @@ export class MoviesService {
         }
 
         const movies = await Movie.findAndCountAll(options);
-
+        if (sort === 'title') {
+            movies.rows.sort((a, b) => {
+                const titleA = a.title.toLowerCase();
+                const titleB = b.title.toLowerCase();
+                if (titleA < titleB) return order === 'ASC' ? -1 : 1;
+                if (titleA > titleB) return order === 'ASC' ? 1 : -1;
+                return 0;
+            });
+        }
         return {data: movies.rows, meta: {total: movies.count}};
     }
 
