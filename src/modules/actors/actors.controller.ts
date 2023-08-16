@@ -8,7 +8,6 @@ const actorsService = new ActorsService();
 
 router.post('/', async (req, res) => {
     try {
-        console.log("newActokkkr", req.body)
 
         const actor = await actorsService.createActor(req.body.name);
         res.status(201).json(actor);

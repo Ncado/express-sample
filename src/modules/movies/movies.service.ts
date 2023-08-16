@@ -26,7 +26,6 @@ export class MoviesService {
         try {
             const resActors = await Promise.all(dto.actors.map(element => this.actorsService.createActor(element)));
             const movie = await Movie.create(dto, {transaction: transaction});
-            console.log(resActors)
             await movie.addActor(resActors, {through: {selfGranted: false}, transaction: transaction});
             await transaction.commit();
             return {
@@ -76,7 +75,6 @@ export class MoviesService {
         }
 
         const movies = await Movie.findAndCountAll(options);
-        console.log(movies)
 
         return {data: movies.rows, meta: {total: movies.count}};
     }

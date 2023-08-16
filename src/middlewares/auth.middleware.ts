@@ -15,7 +15,6 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
 
 
         if (token.length < 0) {
-            console.log("token.length < 0", token.length < 0)
             return res.status(401).json({
                 message: "FORMAT_ERROR",
                 code: "FORMAT_ERROR",
@@ -24,8 +23,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
         }
 
         jwtService.verifyToken(token);
-        console.log(token)
-        console.log("token--->", req.cookies)
+
         next();
 
     } catch (error) {

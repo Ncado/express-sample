@@ -39,7 +39,6 @@ interface CreateMovieRequest extends Request {
 }
 
 router.post('/', async (req: CreateMovieRequest, res: Response) => {
-    console.log(req.body)
     try {
 
         const result = await moviesService.createMovie(req.body);
@@ -59,7 +58,6 @@ interface UpdateMovieRequest extends Request {
 
 router.patch('/:id', async (req: UpdateMovieRequest, res: Response) => {
     try {
-        console.log(req.params.id)
         const result = await moviesService.updateMovie(req.body, Number(req.params.id));
         res.json(result);
     } catch (err) {

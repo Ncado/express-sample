@@ -10,7 +10,6 @@ export class JwtService {
     }
 
     verifyToken(token: { token: string }) {
-        console.log("verify", token)
         try {
             const payload = jwt.verify(token.token, authConfig.jwtConfig.secret);
             return payload;
