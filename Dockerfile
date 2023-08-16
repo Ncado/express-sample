@@ -3,27 +3,26 @@ FROM node:latest  AS builder
 
 WORKDIR ./usr/src/
 
-COPY ../webbylab/package.json yarn.lock ./
-RUN yarn install
-COPY ../webbylab .
+COPY ./package.json package-lock.json ./
+RUN npm install
+COPY ./ .
 
-RUN yarn build
+RUN npm run build
 
 
 FROM node:latest as runner
 
 WORKDIR ./usr/src/
 
-COPY ../webbylab/package.json yarn.lock ./
+COPY ./package.json package-lock.json ./
 
-RUN yarn install
-
-COPY ../webbylab .
+RUN npm install
+COPY ./ .
 
 COPY --from=builder ./usr/src/dist/ ./dist
 
 EXPOSE 3000
 
-CMD ["node", "dist/main"]
+CMD ["node", "dist/index"]
 
 
