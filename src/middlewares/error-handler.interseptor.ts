@@ -6,9 +6,10 @@ export function modifyErrorResponse(req, res, next) {
         // Check if the status code is an error (4xx or 5xx)
         if (res.statusCode >= 400 && res.statusCode < 600) {
             // Create the new error response format
+            console.log(data)
             const newResponse = {
                 error: {
-                    message: data.message || "An error occurred",
+                    message: data.message || "error occurred",
                     code: res.statusCode,
                 },
                 status: 0,

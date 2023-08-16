@@ -1,6 +1,8 @@
-import express from 'express';
+import express, {Request, Response} from 'express';
 import multer from "multer";
 import {MoviesService} from "./movies.service";
+import {CreateMovieDto} from "./dto/create-movie.dto";
+import {UpdateMovieDto} from "./dto/update-movie.dto";
 
 const router = express.Router();
 const {extname} = require('path');
@@ -28,8 +30,14 @@ router.post('/import', upload.single('movies'), async (req, res) => {
     }
 });
 
-router.post('/', async (req, res) => {
+interface CreateMovieRequest extends Request {
+    body: CreateMovieDto;
+}
+
+router.post('/', async (req: CreateMovieRequest, res: Response) => {
+    console.log(req.body)
     try {
+
         const result = await moviesService.createMovie(req.body);
         res.json(result);
     } catch (err) {
@@ -37,7 +45,11 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.patch('/:id', async (req, res) => {
+interface UpdateMovieRequest extends Request {
+    body: UpdateMovieDto;
+}
+
+router.patch('/:id', async (req: UpdateMovieRequest, res: Response) => {
     try {
         console.log(req.params.id)
         const result = await moviesService.updateMovie(req.body, Number(req.params.id));

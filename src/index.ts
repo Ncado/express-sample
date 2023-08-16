@@ -1,8 +1,5 @@
 // src/index.ts
 import express from "express";
-import actorsRoutes from './modules/actors/actors.controller';
-import moviesRoutes from './modules/movies/movies.controller';
-import authRoutes from './modules/auth/auth.contoller';
 
 import dotenv from 'dotenv';
 import {sequelize} from "./configs/database.config";
@@ -10,7 +7,7 @@ import {Actor} from "./modules/actors/actor.model";
 import {Movie} from "./modules/movies/movies.model";
 import {DataTypes} from "sequelize";
 import cookieParser from 'cookie-parser';
-import {authMiddleware} from "./middlewares/auth.middleware";
+import apiRouter from "./app.routes";
 import {modifyResponse} from "./middlewares/response.innterceptor";
 import {modifyErrorResponse} from "./middlewares/error-handler.interseptor";
 
@@ -33,13 +30,8 @@ app.use(session({
     saveUninitialized: true,
 }));
 
-app.use('/movies', authMiddleware, moviesRoutes);
-app.use('/auth', authRoutes);
+app.use('/api/v1', apiRouter);
 
-app.use('/actors', authMiddleware, actorsRoutes);
-app.get('/', (req, res) => {
-    res.send('Hel  lo from Express and TypeScript!');
-});
 const ActorsMovies = sequelize.define('ActorsMovies', {
     ActorId: {
         type: DataTypes.INTEGER,

@@ -1,21 +1,18 @@
 import {authConfig} from "../../configs/auth.config";
 
-const jwt = require('jsonwebtoken');
-
-const secretKey = 'your-secret-key'; // Replace with your secret key
-
+import jwt from 'jsonwebtoken'
 
 export class JwtService {
 
-    createToken(email) {
-        const payload = {email};
-        const token = jwt.sign(payload, secretKey, {expiresIn: '1h'});
+    createToken(payload: { userId: any }): string {
+        const token = jwt.sign(payload, authConfig.jwtConfig.secret, {expiresIn: '121h'});
         return token;
     }
 
-    verifyToken(token) {
+    verifyToken(token: { token: string }) {
+        console.log("verify", token)
         try {
-            const payload = jwt.verify(token, authConfig.jwtConfig.secret);
+            const payload = jwt.verify(token.token, authConfig.jwtConfig.secret);
             return payload;
         } catch (error) {
             throw new Error('Invalid token');

@@ -10,7 +10,7 @@ export class ActorsService {
             return actor;
         }
         try {
-            return {data: await Actor.create({name: value})};
+            return await Actor.create({name: value});
         } catch (e) {
             if (e.name === 'SequelizeUniqueConstraintError') {
                 return Actor.findOne({where: {name: value}});

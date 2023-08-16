@@ -1,11 +1,16 @@
 import {PasswordService} from "../../utils/password.service";
 import {User} from "./users.model";
+import {JwtService} from "../auth/jwt.service";
+import {CreateUserDataDto} from "./dto/create-user-data.dto";
 
 export class UsersService {
     private passwordService: PasswordService;
+    private jwtService: JwtService;
 
     constructor() {
         this.passwordService = new PasswordService();
+        this.jwtService = new JwtService();
+
     }
 
     async getUser() {
@@ -18,7 +23,11 @@ export class UsersService {
         });
     }
 
-    async createUser(createUserData) {
+    async createUser(createUserData: CreateUserDataDto) {
+        if (createUserData.password != createUserData.confirmPassword) {
+            throw new Error('Wrong password');
+
+        }
         if (await this.getUserByEmail(createUserData.email)) {
             throw new Error('User already exists');
         }
@@ -30,7 +39,9 @@ export class UsersService {
             password: hashedPassword,
         });
 
-        return user;
+        const token = this.jwtService.createToken({userId: user.id})
+
+        return {token};
     }
 }
 

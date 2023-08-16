@@ -2,8 +2,9 @@ import {ActorsService} from "../actors/actors.service";
 import {Movie} from "./movies.model";
 import {Actor} from "../actors/actor.model";
 import {Op} from 'sequelize'
-import {sequelize} from "../../configs/database.config";
 import {FindAndCountOptions} from 'sequelize/types';
+import {CreateMovieDto} from "./dto/create-movie.dto";
+import {sequelize} from "../../configs/database.config";
 
 export class MoviesService {
     private actorsService: ActorsService;
@@ -13,11 +14,12 @@ export class MoviesService {
     }
 
 
-    async createMovie(dto) {
+    async createMovie(dto: CreateMovieDto) {
         const transaction = await sequelize.transaction();
         try {
             const resActors = await Promise.all(dto.actors.map(element => this.actorsService.createActor(element)));
             const movie = await Movie.create(dto, {transaction: transaction});
+            console.log(resActors)
             await movie.addActor(resActors, {through: {selfGranted: false}, transaction: transaction});
             await transaction.commit();
             return {

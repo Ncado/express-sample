@@ -5,10 +5,12 @@ const jwtService = new JwtService();
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction) {
     try {
-        const token = req.cookies.jwt;
+        let token = req.cookies.jwt;
+        if (!token) {
+            const authHeader = req.headers['authorization'];
+            token = {token: authHeader && authHeader.split(' ')[1]};
+        }
 
-        console.log(token)
-        console.log("token--->", req.cookies)
 
         if (token.length < 0) {
             console.log("token.length < 0", token.length < 0)
@@ -16,9 +18,9 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
         }
 
         jwtService.verifyToken(token);
-        //req.userId = decoded.userId; // Attach the decoded userId to the request
-
-        next(); // Allow access to the endpoint
+        console.log(token)
+        console.log("token--->", req.cookies)
+        next();
 
     } catch (error) {
         res.status(401).json({message: 'Unauthorized'});
